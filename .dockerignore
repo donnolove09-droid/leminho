@@ -3,4 +3,4 @@ __pycache__/
 .git/
 .env
 *.png
-*.html
+node_modules/
