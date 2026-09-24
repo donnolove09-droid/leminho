@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: garena-bot
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 10000
