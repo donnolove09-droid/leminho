@@ -1,0 +1,10 @@
+services:
+  - type: worker
+    name: garena-bot
+    runtime: docker          # Đổi từ python → docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: GARENA_USERNAME
+        sync: false
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /ms-playwright
