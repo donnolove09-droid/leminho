@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VDON GOODBOY</title>
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --panel: #131317;
+    --panel-2: #1a1a20;
+    --border: #26262e;
+    --text: #e6e6e6;
+    --muted: #7a7a85;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+    line-height: 1.5;
+  }
+  .container { max-width: 1180px; margin: 0 auto; }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h1 .dot {
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .header-links {
+    display: flex; gap: 8px; font-size: 13px;
+  }
+  .header-links a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .header-links a:hover { color: var(--text); border-color: var(--accent); }
+
+  /* Panel */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Control form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto auto;
+    gap: 10px;
+    align-items: end;
+  }
+  @media (max-width: 720px) {
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid .grow { grid-column: 1 / -1; }
+    .form-grid button { grid-column: span 1; }
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  input {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: var(--sans);
+    transition: border 0.15s;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  button:hover { background: var(--accent-hover); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.danger { background: var(--danger); }
+  button.danger:hover { background: #dc2626; }
+  button.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  button.ghost:hover { border-color: var(--accent); }
+
+  /* Status bar */
+  .status-row {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 13px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-item .label { color: var(--muted); }
+  .status-item .value { font-family: var(--mono); font-weight: 600; }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin-top: 12px;
+    height: 6px;
+    background: var(--panel-2);
+    border-radius: 3px;
+    overflow: hidden;
+    display: none;
+  }
+  .progress-wrap.active { display: block; }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--success));
+    width: 0%;
+    transition: width 0.4s;
+  }
+
+  /* Stats cards */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .stat .k {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .stat .v {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: var(--mono);
+  }
+  .stat.ok .v { color: var(--success); }
+  .stat.fail .v { color: var(--danger); }
+  .stat.run .v { color: var(--warn); }
+
+  /* Log console */
+  .log-console {
+    background: #050507;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.65;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #b8b8c0;
+  }
+  .log-console::-webkit-scrollbar { width: 8px; }
+  .log-console::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  /* Screenshots */
+  .shots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .shot {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .shot:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .shot img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+    background: #000;
+  }
+  .shot .caption {
+    padding: 6px 8px;
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .shot .caption .tag { color: var(--accent); }
+
+  /* History table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  tbody tr:hover { background: var(--panel-2); }
+  td.mono { font-family: var(--mono); }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pill.ok { background: rgba(34,197,94,0.15); color: var(--success); }
+  .pill.fail { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* Modal for full screenshot */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 999;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  .modal.active { display: flex; }
+  .modal img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1><span class="dot"></span> Garena Bot</h1>
+    <div class="header-links">
+      <a href="/logs" target="_blank">Raw logs</a>
+      <a href="/healthz" target="_blank">Health</a>
+      <a href="#" onclick="refreshAll();return false;">↻ Refresh</a>
+    </div>
+  </header>
+
+  <!-- Control panel -->
+  <div class="panel">
+    <div class="form-grid">
+      <div class="field grow">
+        <label>Username</label>
+        <input id="u" placeholder="skck155" value="skck155" autocomplete="off"/>
+      </div>
+      <div class="field">
+        <label>Số lần</label>
+        <input id="c" type="number" value="10" min="1" max="20"/>
+      </div>
+      <div class="field">
+        <label>Song song</label>
+        <input id="p" type="number" value="2" min="1" max="5"/>
+      </div>
+      <button id="btn-run" onclick="startBatch()">▶ Chạy</button>
+      <button id="btn-stop" class="danger" onclick="stopBatch()" disabled>■ Dừng</button>
+    </div>
+
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <div class="status-row">
+      <div class="status-item">
+        <span class="label">Trạng thái:</span>
+        <span class="value" id="st-state">idle</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Tiến độ:</span>
+        <span class="value" id="st-progress">0/0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Thời gian:</span>
+        <span class="value" id="st-elapsed">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats cards -->
+  <div class="stats">
+    <div class="stat ok">
+      <div class="k">Thành công</div>
+      <div class="v" id="st-ok">0</div>
+    </div>
+    <div class="stat fail">
+      <div class="k">Thất bại</div>
+      <div class="v" id="st-fail">0</div>
+    </div>
+    <div class="stat run">
+      <div class="k">Đang chạy</div>
+      <div class="v" id="st-active">0</div>
+    </div>
+    <div class="stat">
+      <div class="k">Tổng lần</div>
+      <div class="v" id="st-total">0</div>
+    </div>
+  </div>
+
+  <!-- Screenshots -->
+  <div class="panel">
+    <div class="panel-title">
+      <span>Screenshots</span>
+      <span id="shot-count" style="color:var(--muted);font-size:11px;">0</span>
+    </div>
+    <div class="shots" id="shots">
+      <div class="empty">Chưa có screenshot</div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="panel">
+    <div class="panel-title">
+      <span>Lịch sử chạy</span>
+      <span id="hist-count" style="color:var(--muted);font-size:11px;">0</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Giờ</th><th>Username</th><th>KQ</th>
+            <th>Step</th><th>Chi tiết</th><th>Thời gian</th>
+          </tr>
+        </thead>
+        <tbody id="hist-body">
+          <tr><td colspan="7" class="empty">Chưa có lịch sử</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="panel">
+    <div class="panel-title">
+      <span>Log realtime</span>
+      <button class="ghost" style="padding:4px 10px;font-size:11px;"
+              onclick="document.getElementById('log').textContent=''">
+        Clear
+      </button>
+    </div>
+    <div class="log-console" id="log">(đang tải...)</div>
+  </div>
+
+</div>
+
+<!-- Modal full screenshot -->
+<div class="modal" id="modal" onclick="this.classList.remove('active')">
+  <img id="modal-img" src=""/>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+async function startBatch() {
+  const username = $('u').value.trim();
+  const count = parseInt($('c').value);
+  const concurrency = parseInt($('p').value);
+  if (!username) return alert('Nhập username');
+
+  $('btn-run').disabled = true;
+  try {
+    const r = await fetch('/batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, count, concurrency })
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      alert('Lỗi: ' + (data.detail || JSON.stringify(data)));
+      $('btn-run').disabled = false;
+      return;
+    }
+    poll();
+  } catch (e) {
+    alert('Lỗi kết nối: ' + e);
+    $('btn-run').disabled = false;
+  }
+}
+
+async function stopBatch() {
+  await fetch('/stop', { method: 'POST' });
+  $('btn-stop').disabled = true;
+}
+
+async function refreshAll() {
+  await Promise.all([updateLog(), updateStatus()]);
+}
+
+async function updateLog() {
+  try {
+    const r = await fetch('/logs');
+    const text = await r.text();
+    const el = $('log');
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    el.textContent = text;
+    if (atBottom) el.scrollTop = el.scrollHeight;
+  } catch (e) {}
+}
+
+async function updateStatus() {
+  try {
+    const r = await fetch('/status');
+    if (!r.ok) return;
+    const d = await r.json();
+
+    // Trạng thái
+    $('st-state').textContent = d.running ? 'RUNNING' : 'idle';
+    $('st-state').style.color = d.running ? 'var(--warn)' : 'var(--muted)';
+    $('st-progress').textContent = `${d.done + d.failed}/${d.total}`;
+    $('st-ok').textContent = d.done;
+    $('st-fail').textContent = d.failed;
+    $('st-total').textContent = d.total;
+    $('st-active').textContent = Math.max(0, d.total - d.done - d.failed - (d.running ? 0 : 9999));
+    if (!d.running) $('st-active').textContent = 0;
+    $('st-elapsed').textContent = d.elapsed != null ? d.elapsed + 's' : '—';
+
+    // Nút
+    $('btn-run').disabled = d.running;
+    $('btn-stop').disabled = !d.running;
+
+    // Progress
+    const pct = d.total > 0 ? ((d.done + d.failed) / d.total) * 100 : 0;
+    $('progress-bar').style.width = pct + '%';
+    $('progress-wrap').classList.toggle('active', d.running || pct > 0);
+  } catch (e) {}
+}
+
+async function updateShots() {
+  try {
+    const r = await fetch('/shots');
+    const list = await r.json();
+    const el = $('shots');
+    $('shot-count').textContent = list.length;
+    if (!list.length) {
+      el.innerHTML = '<div class="empty">Chưa có screenshot</div>';
+      return;
+    }
+    el.innerHTML = list.map(s => `
+      <div class="shot" onclick="openShot('${s.idx}','${s.tag}')">
+        <img src="/shot/${s.idx}?tag=${s.tag}&t=${Date.now()}" loading="lazy"/>
+        <div class="caption">
+          <span>#${s.idx}</span>
+          <span class="tag">${s.tag}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {}
+}
+
+function openShot(idx, tag) {
+  $('modal-img').src = `/shot/${idx}?tag=${tag}`;
+  $('modal').classList.add('active');
+}
+
+async function updateHistory() {
+  try {
+    const r = await fetch('/history');
+    const list = await r.json();
+    const el = $('hist-body');
+    $('hist-count').textContent = list.length;
+    if (!list.length) {
+      el.innerHTML = '<tr><td colspan="7" class="empty">Chưa có lịch sử</td></tr>';
+      return;
+    }
+    el.innerHTML = list.slice().reverse().map(h => `
+      <tr>
+        <td class="mono">${h.idx}</td>
+        <td class="mono">${h.time}</td>
+        <td class="mono">${h.username}</td>
+        <td><span class="pill ${h.ok ? 'ok' : 'fail'}">${h.ok ? 'OK' : 'FAIL'}</span></td>
+        <td class="mono">${h.step || '-'}</td>
+        <td class="mono" style="color:var(--muted)">${h.detail || '-'}</td>
+        <td class="mono">${h.duration}s</td>
+      </tr>
+    `).join('');
+  } catch (e) {}
+}
+
+function poll() {
+  updateLog();
+  updateStatus();
+  updateShots();
+  updateHistory();
+}
+
+poll();
+setInterval(poll, 2000);
+</script>
+</body>
+</html>
