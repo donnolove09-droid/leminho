@@ -8,3 +8,7 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: MAX_CONCURRENT
+        value: 2
+      - key: HARD_TIMEOUT
+        value: 60
